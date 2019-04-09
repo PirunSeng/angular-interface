@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { library } from  '@fortawesome/fontawesome-svg-core';
 import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { without } from 'lodash';
+import { without, findIndex } from 'lodash';
 
 library.add(faTimes, faPlus);
 
@@ -16,15 +16,27 @@ export class AppComponent implements OnInit {
   modifiedList: object[];
   orderBy: string;
   orderType: string;
+  lastIndex: number;
 
   deleteApt(theApt: object){
     this.theList = without(this.theList, theApt);
     this.modifiedList = without(this.theList, theApt);
   }
 
-  addApt(theApt: object){
+  updateApt(aptInfo){
+    let aptIndex: number;
+    let modifiedIndex: number;
+    aptIndex = findIndex(this.theList, { aptId: aptInfo.theApt.aptId });
+    modifiedIndex = findIndex(this.modifiedList, { aptId: aptInfo.theApt.aptId });
+    this.theList[aptIndex][aptInfo.labelName] = aptInfo.newValue;
+    this.modifiedList[modifiedIndex][aptInfo.labelName] = aptInfo.newValue;
+  }
+
+  addApt(theApt: any){
+    theApt.aptId = this.lastIndex;
     this.theList.unshift(theApt);
     this.modifiedList.unshift(theApt);
+    this.lastIndex++;
   }
 
   searchApt(theQuery: string){
@@ -67,9 +79,14 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(){
+    this.lastIndex = 0;
+
     this.http.get<Object[]>('../assets/data.json').subscribe(data => {
       // console.log(data);
-      this.theList = data;
+      this.theList = data.map((item: any) => {
+        item.aptId = this.lastIndex++;
+        return item;
+      });
       this.modifiedList = data;
       this.sortItems();
     });

@@ -12,7 +12,9 @@
             [orderBy]="orderBy"
             [orderType]="orderType"></app-search>
           <app-list [aptList]="modifiedList"
-            (deleteEvt)="deleteApt($event)"></app-list>
+            (deleteEvt)="deleteApt($event)"
+            (updateEvt)="updateApt($event)"
+            ></app-list>
         </div>
       </div>
     </div>
